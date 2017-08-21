@@ -81,13 +81,10 @@ def library_paths():
     def magick_path(path):
         return os.path.join(magick_home, *path)
     combinations = itertools.product(versions, options)
-    suffixes = (version + option for version, option in combinations)
-    if magick_home:
-        # exhaustively search for libraries in magick_home before calling
-        # find_library
-        for suffix in suffixes:
-            # On Windows, the API is split between two libs.
-            # On other platforms, it's all contained in one.
+    for suffix in (version + option for version, option in combinations):
+        # On Windows, the API is split between two libs. On other platforms,
+        # it's all contained in one.
+        if magick_home:
             if system == 'Windows':
                 libwand = 'CORE_RL_wand_{0}.dll'.format(suffix),
                 libmagick = 'CORE_RL_magick_{0}.dll'.format(suffix),
@@ -101,7 +98,6 @@ def library_paths():
             else:
                 libwand = 'lib', 'libMagickWand{0}.so'.format(suffix),
                 yield magick_path(libwand), magick_path(libwand)
-    for suffix in suffixes:
         if system == 'Windows':
             libwand = ctypes.util.find_library('CORE_RL_wand_' + suffix)
             libmagick = ctypes.util.find_library('CORE_RL_magick_' + suffix)
@@ -1391,6 +1387,10 @@ try:
                                             ctypes.c_int,
                                             ctypes.c_bool,
                                             ctypes.c_bool]
+    # Experimental stuff
+    library.MagickRemapImage.argtypes = [ctypes.c_void_p, # Wand that would be affected
+                                         ctypes.c_void_p, # Pallete (wand)
+                                         ctypes.c_bool] # Dither method (NoDitherMethod, RiemersmaDitherMethod, FloydSteinbergDitherMethod)
 
 except AttributeError:
     raise ImportError('MagickWand shared library not found or incompatible\n'

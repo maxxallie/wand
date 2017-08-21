@@ -57,7 +57,7 @@ __all__ = ('VERSION', 'VERSION_INFO', 'MAGICK_VERSION',
 #:
 #: .. versionchanged:: 0.1.9
 #:    Becomes :class:`tuple`.  (It was string before.)
-VERSION_INFO = (0, 4, 5)
+VERSION_INFO = (0, 4, 4)
 
 #: (:class:`basestring`) The version string e.g. ``'0.1.2'``.
 #:
@@ -222,7 +222,6 @@ def formats(pattern='*'):
         formats.append(text(value))
         cursor += 1
     return formats
-
 
 if __doc__ is not None:
     __doc__ = __doc__.replace('0.0.0', VERSION)

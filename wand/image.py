@@ -1822,8 +1822,19 @@ class BaseImage(Resource):
             raise TypeError('delta_x must be a float, not ' + repr(delta_x))
         elif not isinstance(rigidity, numbers.Real):
             raise TypeError('rigidity must be a float, not ' + repr(rigidity))
-        library.MagickLiquidRescaleImage(self.wand, int(width), int(height),
-                                         float(delta_x), float(rigidity))
+        if self.animation:
+            library.MagickLiquidRescaleImage(self.wand, int(width), int(height),
+                                        float(delta_x), float(rigidity))
+            library.MagickSetLastIterator(self.wand)
+            n = library.MagickGetIteratorIndex(self.wand)
+            library.MagickResetIterator(self.wand)
+            for i in range(0, n + 1):
+                library.MagickSetIteratorIndex(self.wand, i)
+                library.MagickLiquidRescaleImage(self.wand, int(width), int(height),
+                                        float(delta_x), float(rigidity))
+        else:
+            library.MagickLiquidRescaleImage(self.wand, int(width), int(height),
+                                        float(delta_x), float(rigidity))
         try:
             self.raise_exception()
         except MissingDelegateError as e:
@@ -2543,6 +2554,12 @@ class BaseImage(Resource):
         )
         if not r:
             self.raise_exception()
+
+    # Experimental stuff
+    @manipulative
+    def remap_image(self, pallete_image, dither):
+        library.MagickRemapImage(self.wand, pallete_image.wand, dither)
+        self.raise_exception()
 
     @manipulative
     def transform_colorspace(self, colorspace_type):
